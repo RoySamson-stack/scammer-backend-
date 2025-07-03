@@ -1,38 +1,38 @@
 const express = require('express');
 const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
-const userValidation = require('../../validations/user.validation');
-const userController = require('../../controllers/user.controller');
+const reportValidation = require('../../validations/report.validation');//change this to report
+const reportController = require('../../controllers/report.controller');
 
-const   router = express.Router();
+const router = express.Router();
 
 router
   .route('/')
-  .post(auth('manageUsers'), validate(userValidation.createUser), userController.createUser)
-  .get(auth('getUsers'), validate(userValidation.getUsers), userController.getUsers);
+  .post(auth('manageReports'), validate(reportValidation.createReport), reportController.createReport)
+  .get(auth('getReports'), validate(reportValidation.getReports), reportController.getReports);
 
 router
-  .route('/:userId')
-  .get(auth('getUsers'), validate(userValidation.getUser), userController.getUser)
-  .patch(auth('manageUsers'), validate(userValidation.updateUser), userController.updateUser)
-  .delete(auth('manageUsers'), validate(userValidation.deleteUser), userController.deleteUser);
+  .route('/:reportId')
+  .get(auth('getReports'), validate(reportValidation.getReport), reportController.getReport)
+  .patch(auth('manageReports'), validate(reportValidation.updateReport), reportController.updateReport)
+  .delete(auth('manageReports'), validate(reportValidation.deleteReport), reportController.deleteReport);
 
 module.exports = router;
 
 /**
  * @swagger
  * tags:
- *   name: Users
- *   description: User management and retrieval
+ *   name: Reports
+ *   description: Report management and retrieval
  */
 
 /**
  * @swagger
- * /users:
+ * /reports:
  *   post:
- *     summary: Create a user
- *     description: Only admins can create other users.
- *     tags: [Users]
+ *     summary: Create a report
+ *     description: Only admins can create other reports.
+ *     tags: [Reports]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -42,37 +42,51 @@ module.exports = router;
  *           schema:
  *             type: object
  *             required:
- *               - name
- *               - email
- *               - password
- *               - role
+ *               - title
+ *               - description
+ *               - type
+ *               - scammerInfo
+ *               - amountLost
+ *               - dateOfIncident
+ *               - evidence        
  *             properties:
- *               name:
+ *               title:
  *                 type: string
- *               email:
+ *                 description: Title of the report
+ *               description:
  *                 type: string
- *                 format: email
- *                 description: must be unique
- *               password:
+ *                 description: Detailed description of the incident
+ *               type:
  *                 type: string
- *                 format: password
- *                 minLength: 8
- *                 description: At least one number and one letter
- *               role:
- *                  type: string
- *                  enum: [user, admin]
+ *                 description: Type of scam
+ *               rscammerInfo:
+ *                 type: string
+ *                 description: Information about the scammer
+ *               amountLost:
+ *                 type: number
+ *                 description: Amount of money lost
+ *               dateOfIncident:
+ *                 type: string
+ *                 format: date
+ *                 description: Date when the incident occurred
+ *               evidence:
+ *                 type: string
+ *                 description: Evidence file name or URL
  *             example:
- *               name: fake name
- *               email: fake@example.com
- *               password: password1
- *               role: user
+ *               title: scammed using a fake job scam
+ *               description: something to note on the fake job scam conned money
+ *               type: fake job
+ *               rscammerInfo: 070264178
+ *               amountLost: 15000
+ *               dateOfIncident: 2023-10-12
+ *               evidence: scam.jpg
  *     responses:
  *       "201":
  *         description: Created
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/User'
+ *                $ref: '#/components/schemas/Report'
  *       "400":
  *         $ref: '#/components/responses/DuplicateEmail'
  *       "401":
@@ -81,9 +95,9 @@ module.exports = router;
  *         $ref: '#/components/responses/Forbidden'
  *
  *   get:
- *     summary: Get all users
- *     description: Only admins can retrieve all users.
- *     tags: [Users]
+ *     summary: Get all reports
+ *     description: Only admins can retrieve all reports.
+ *     tags: [Reports]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -91,12 +105,12 @@ module.exports = router;
  *         name: name
  *         schema:
  *           type: string
- *         description: User name
+ *         description: Report name
  *       - in: query
  *         name: role
  *         schema:
  *           type: string
- *         description: User role
+ *         description: Report role
  *       - in: query
  *         name: sortBy
  *         schema:
@@ -108,7 +122,7 @@ module.exports = router;
  *           type: integer
  *           minimum: 1
  *         default: 10
- *         description: Maximum number of users
+ *         description: Maximum number of reports
  *       - in: query
  *         name: page
  *         schema:
@@ -127,7 +141,7 @@ module.exports = router;
  *                 results:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/User'
+ *                     $ref: '#/components/schemas/Report'
  *                 page:
  *                   type: integer
  *                   example: 1
@@ -148,11 +162,11 @@ module.exports = router;
 
 /**
  * @swagger
- * /users/{id}:
+ * /reports/{id}:
  *   get:
- *     summary: Get a user
- *     description: Logged in users can fetch only their own user information. Only admins can fetch other users.
- *     tags: [Users]
+ *     summary: Get a report
+ *     description: Logged in reports can fetch only their own report information. Only admins can fetch other reports.
+ *     tags: [Reports]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -161,14 +175,14 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: User id
+ *         description: Report id
  *     responses:
  *       "200":
  *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/User'
+ *                $ref: '#/components/schemas/Report'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
@@ -177,9 +191,9 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   patch:
- *     summary: Update a user
- *     description: Logged in users can only update their own information. Only admins can update other users.
- *     tags: [Users]
+ *     summary: Update a report
+ *     description: Logged in reports can only update their own information. Only admins can update other reports.
+ *     tags: [Reports]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -188,7 +202,7 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: User id
+ *         description: Report id
  *     requestBody:
  *       required: true
  *       content:
@@ -217,7 +231,7 @@ module.exports = router;
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/User'
+ *                $ref: '#/components/schemas/Report'
  *       "400":
  *         $ref: '#/components/responses/DuplicateEmail'
  *       "401":
@@ -228,9 +242,9 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   delete:
- *     summary: Delete a user
- *     description: Logged in users can delete only themselves. Only admins can delete other users.
- *     tags: [Users]
+ *     summary: Delete a report
+ *     description: Logged in reports can delete only themselves. Only admins can delete other reports.
+ *     tags: [Reports]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -239,7 +253,7 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: User id
+ *         description: Report id
  *     responses:
  *       "200":
  *         description: No content
