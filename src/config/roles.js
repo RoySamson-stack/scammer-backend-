@@ -1,12 +1,7 @@
 const allRoles = {
-  user: ['getReports', 'createReport', 'getReport', 'updateReport', 'deleteReport'],
-  admin: ['getUsers', 'manageUsers'],
+  user: ['getReports', 'createReport', 'getReport', 'updateReport', 'deleteReport', 'getUsers', 'manageUsers'],
+  admin: ['getReports', 'createReport', 'getReport', 'updateReport', 'deleteReport', 'getUsers', 'manageUsers'],
 };
 
-const roles = Object.keys(allRoles);
-const roleRights = new Map(Object.entries(allRoles));
-
-module.exports = {
-  roles,
-  roleRights,
-};
+export const roles = Object.keys(allRoles);
+export const roleRights = new Map(Object.entries(allRoles));

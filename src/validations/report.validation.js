@@ -3,7 +3,6 @@ const { objectId } = require('./custom.validation');
 
 const createReport = {
   body: Joi.object().keys({
-    user_id: Joi.number().required(),
     title: Joi.string().required(),
     description: Joi.string().required(),
     type: Joi.string().required().valid(
@@ -11,14 +10,11 @@ const createReport = {
       'phishing',
       'romance_scam',
       'lottery_scam',
+      'scam_token',
+      'fake_aridrop',
       'other'
     ),
     status: Joi.string().required().valid('active', 'resolved', 'pending'),
-    scammer_name: Joi.string().allow('', null),
-    scammer_phone: Joi.string().allow('', null),
-    scammer_email: Joi.string().email().allow('', null),
-    scammer_website: Joi.string().uri().allow('', null),
-    scammer_social_media: Joi.string().allow('', null),
     amount_lost: Joi.number().precision(2).min(0).required(),
     location: Joi.string().allow('', null),
     view_count: Joi.number().integer().min(0).default(0),

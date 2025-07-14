@@ -7,11 +7,8 @@ const ApiError = require('../utils/ApiError');
  * @param {Object} reportBody
  * @returns {Promise<Report>}
  */
-const createReport = async (reportBody) => {
-  if (await User.isEmailTaken(reportBody.email)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
-  }
-  return Report.create(reportBody);
+const createReport = async (reportBody, userId) => {
+  return Report.create({ ...reportBody, user: userId });
 };
 
 /**

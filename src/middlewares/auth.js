@@ -9,6 +9,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
     return reject(new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate'));
   }
   req.user = user;
+  // req.admin = admin;
 
   if (requiredRights.length) {
     const userRights = roleRights.get(user.role);

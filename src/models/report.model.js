@@ -18,28 +18,28 @@ const reportSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['open', 'in-progress', 'closed'],
+      enum: ['open', 'in-progress', 'closed', 'pending'],
       default: 'open',
     },
-    reporterId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-  },
-    scammerInfo:{
-        type: String,
-        required: true,
-    },
-    amounLost:{
-        type: Number,
-        required: true,
-        min: 0,
-    },
-    evidence: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+  //   reporterId: {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: 'User',
+  //     required: true,
+  // },
+  //   // scammerInfo:{
+    //     type: String,
+    //     required: true,
+    // // },
+    // amountLost: {
+    //     type: Number,
+    //     required: true,
+    //     min: 0,
+    // },
+    // evidence: {
+    //   type: String,
+    //   required: true,
+    //   trim: true,
+    // },
   },
   {
     timestamps: true,

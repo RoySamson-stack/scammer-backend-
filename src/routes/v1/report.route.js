@@ -8,14 +8,18 @@ const router = express.Router();
 
 router
   .route('/')
-  .post(auth('manageReports'), validate(reportValidation.createReport), reportController.createReport)
+  .post(validate(reportValidation.createReport), reportController.createReport)
   .get(auth('getReports'), validate(reportValidation.getReports), reportController.getReports);
 
 router
   .route('/:reportId')
-  .get(auth('getReports'), validate(reportValidation.getReport), reportController.getReport)
-  .patch(auth('manageReports'), validate(reportValidation.updateReport), reportController.updateReport)
-  .delete(auth('manageReports'), validate(reportValidation.deleteReport), reportController.deleteReport);
+  .get(validate(reportValidation.getReport), reportController.getReport)
+  .patch(
+    // auth('manageReports'), 
+    validate(reportValidation.updateReport), reportController.updateReport)
+  .delete(
+    // auth('manageReports'), 
+    validate(reportValidation.deleteReport), reportController.deleteReport);
 
 module.exports = router;
 
