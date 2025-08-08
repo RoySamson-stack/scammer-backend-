@@ -50,12 +50,37 @@ if (config.env === 'production') {
   app.use('/v1/auth', authLimiter);
 }
 
+// ADD THIS: Root route to handle base URL
+app.get('/', (req, res) => {
+  res.status(200).json({
+    message: 'Welcome to the API!',
+    status: 'Server is running',
+    version: '1.0.0',
+    endpoints: {
+      api: '/v1',
+      health: '/health',
+      docs: '/v1/docs' // if you have API documentation
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+// ADD THIS: Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    uptime: Math.floor(process.uptime()),
+    environment: config.env,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // v1 api routes
 app.use('/v1', routes);
 
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {
-  next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
+  next(new ApiError(httpStatus.NOT_FOUND, `Route ${req.originalUrl} not found`));
 });
 
 // convert error to ApiError, if needed
