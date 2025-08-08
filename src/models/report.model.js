@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const bcrypt = require('bcryptjs');
 const { toJSON, paginate } = require('./plugins');
 const { roles } = require('../config/roles');
 
@@ -21,25 +20,54 @@ const reportSchema = mongoose.Schema(
       enum: ['open', 'in-progress', 'closed', 'pending'],
       default: 'open',
     },
-  //   reporterId: {
-  //     type: mongoose.Schema.Types.ObjectId,
-  //     ref: 'User',
-  //     required: true,
-  // },
-  //   // scammerInfo:{
-    //     type: String,
-    //     required: true,
-    // // },
-    // amountLost: {
-    //     type: Number,
-    //     required: true,
-    //     min: 0,
-    // },
-    // evidence: {
-    //   type: String,
-    //   required: true,
-    //   trim: true,
-    // },
+    reporterId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    type: {
+      type: String,
+      required: true,
+      enum: [
+        'investment_scam',
+        'phishing',
+        'romance_scam',
+        'lottery_scam',
+        'scam_token',
+        'fake_aridrop',
+        'other',
+      ],
+    },
+    scammerName: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    scammerPhone: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    scammerEmail: {
+      type: String,
+      trim: true,
+      validate(value) {
+        if (value && !validator.isEmail(value)) {
+          throw new Error('Invalid email');
+        }
+      },
+      default: '',
+    },
+    amountLost: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
+    evidence: {
+      type: String,
+      trim: true,
+      default: '',
+    },
   },
   {
     timestamps: true,
@@ -50,34 +78,38 @@ const reportSchema = mongoose.Schema(
 reportSchema.plugin(toJSON);
 reportSchema.plugin(paginate);
 
-/**
- * Check if email is taken
- * @param {string} email - The user's email
- * @param {ObjectId} [excludeUserId] - The id of the user to be excluded
- * @returns {Promise<boolean>}
- */
-reportSchema.statics.isEmailTaken = async function (email, excludeUserId) {
-  const user = await this.findOne({ email, _id: { $ne: excludeUserId } });
-  return !!user;
+// Static method to find reports by user
+reportSchema.statics.findByReporter = async function (userId, options = {}) {
+  return this.paginate({ userId }, options);
 };
 
-/**
- * Check if password matches the user's password
- * @param {string} password
- * @returns {Promise<boolean>}
- */
-reportSchema.methods.isPasswordMatch = async function (password) {
-  const user = this;
-  return bcrypt.compare(password, user.password);
+// Static method to get report statistics for a user
+reportSchema.statics.getReporterStats = async function (userId) {
+  const stats = await this.aggregate([
+    { $match: { userId: mongoose.Types.ObjectId(userId) } },
+    {
+      $group: {
+        _id: '$status',
+        count: { $sum: 1 }
+      }
+    }
+  ]);
+  
+  const result = {
+    total: 0,
+    open: 0,
+    'in-progress': 0,
+    closed: 0,
+    pending: 0
+  };
+  
+  stats.forEach(stat => {
+    result[stat._id] = stat.count;
+    result.total += stat.count;
+  });
+  
+  return result;
 };
-
-reportSchema.pre('save', async function (next) {
-  const user = this;
-  if (user.isModified('password')) {
-    user.password = await bcrypt.hash(user.password, 8);
-  }
-  next();
-});
 
 /**
  * @typedef Report

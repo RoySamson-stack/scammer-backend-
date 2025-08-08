@@ -14,10 +14,11 @@ const createReport = {
       'fake_aridrop',
       'other'
     ),
-    status: Joi.string().required().valid('active', 'resolved', 'pending'),
-    amount_lost: Joi.number().precision(2).min(0).required(),
+    status: Joi.string().valid('open', 'in-progress', 'closed', 'pending').default('open'),
     location: Joi.string().allow('', null),
     view_count: Joi.number().integer().min(0).default(0),
+    scammer_name: Joi.string().allow('', null),
+    scammer_phone: Joi.string().allow('', null),
     upvotes: Joi.number().integer().min(0).default(0),
     downvotes: Joi.number().integer().min(0).default(0),
     is_trending: Joi.boolean().default(false),
@@ -43,6 +44,27 @@ const getReport = {
   }),
 };
 
+const getUserReports = {
+  params: Joi.object().keys({
+    userId: Joi.string().custom(objectId),
+  }),
+  query: Joi.object().keys({
+    type: Joi.string().valid(
+      'investment_scam',
+      'phishing',
+      'romance_scam',
+      'lottery_scam',
+      'scam_token',
+      'fake_aridrop',
+      'other'
+    ),
+    status: Joi.string().valid('open', 'in-progress', 'closed', 'pending'),
+    sortBy: Joi.string(),
+    limit: Joi.number().integer().min(1).max(100).default(10),
+    page: Joi.number().integer().min(1).default(1),
+  }),
+};
+
 const updateReport = {
   params: Joi.object().keys({
     reportId: Joi.required().custom(objectId),
@@ -57,15 +79,14 @@ const updateReport = {
         'phishing',
         'romance_scam',
         'lottery_scam',
-        'other'
+        'scam_token',
+        'fake_aridrop',
+        'other',
       ),
-      status: Joi.string().valid('active', 'resolved', 'pending'),
+      status: Joi.string().valid('open', 'in-progress', 'closed', 'pending'),
       scammer_name: Joi.string().allow('', null),
       scammer_phone: Joi.string().allow('', null),
-      scammer_email: Joi.string().email().allow('', null),
       scammer_website: Joi.string().uri().allow('', null),
-      scammer_social_media: Joi.string().allow('', null),
-      amount_lost: Joi.number().precision(2).min(0),
       location: Joi.string().allow('', null),
       view_count: Joi.number().integer().min(0),
       upvotes: Joi.number().integer().min(0),
@@ -85,6 +106,7 @@ module.exports = {
   createReport,
   getReports,
   getReport,
+  getUserReports,
   updateReport,
   deleteReport,
 };
