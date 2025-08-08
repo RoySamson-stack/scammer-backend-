@@ -30,7 +30,6 @@ app.use(express.json());
 // parse urlencoded request body
 app.use(express.urlencoded({ extended: true }));
 
-// sanitize request data
 app.use(xss());
 app.use(mongoSanitize());
 
@@ -50,7 +49,6 @@ if (config.env === 'production') {
   app.use('/v1/auth', authLimiter);
 }
 
-// ADD THIS: Root route to handle base URL
 app.get('/', (req, res) => {
   res.status(200).json({
     message: 'Welcome to the API!',
@@ -59,13 +57,12 @@ app.get('/', (req, res) => {
     endpoints: {
       api: '/v1',
       health: '/health',
-      docs: '/v1/docs' // if you have API documentation
+      docs: '/v1/docs' 
     },
     timestamp: new Date().toISOString()
   });
 });
 
-// ADD THIS: Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
